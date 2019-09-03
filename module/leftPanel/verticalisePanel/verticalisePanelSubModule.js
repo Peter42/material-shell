@@ -91,12 +91,13 @@ var VerticalisePanelSubModule = class VerticalisePanelSubModule {
     enable() {
         // 1- Set all List container to vertical
         GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-            this.recursivelySetVertical(this.panel, true);
+            this.recursivelySetVertical(this.panel.actor, true);
             return GLib.SOURCE_REMOVE;
         });
 
         // 2- Override the allocate function of the panel to display the PanelBoxes vertically
-        this.panel.__proto__[Gi.hook_up_vfunc_symbol](
+        Gi.hook_up_vfunc(
+            this.panel.actor.__proto__,
             'allocate',
             this.panelAllocate
         );
@@ -110,10 +111,11 @@ var VerticalisePanelSubModule = class VerticalisePanelSubModule {
     }
 
     disable() {
-        this.recursivelySetVertical(this.panel, false);
-        this.panel.__proto__[Gi.hook_up_vfunc_symbol](
+        this.recursivelySetVertical(this.panel.actor, false);
+        Gi.hook_up_vfunc(
+            this.panel.actor.__proto__.vfunc_allocate,
             'allocate',
-            this.panel.__proto__.vfunc_allocate
+            this.panelAllocate
         );
         //3- Revert function
         Main.wm._getPositionForDirection =
